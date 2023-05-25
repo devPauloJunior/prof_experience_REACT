@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { getcadexperience, addcadexperience } from '../Service/ApiService';
+import { getcadexperience, addcadexperience, editcadexperience, deletecadexperience } from '../Service/ApiService';
 import CadExperienceAdd from './CadExperienceAdd'
+import CadExperienceEdit from './CadExperienceEdit';
 
 function CadExperienceList() {
     const [ cadExperiences, setCadExperiences ] = useState([]);
     const [ showCadExperiencesForm, setShowCadExperiencesForm ] = useState(false);
+    const [ showEditExperiencesForm, setShowEditExperiencesForm ] = useState(false);
+    const [ selectEditData, setSelectEditData ] = useState();
     
     useEffect(() => {
         let mount = true
@@ -21,6 +24,26 @@ function CadExperienceList() {
             setCadExperiences([res])
         })
     }
+
+    const handleEditSubmit = (e, cadexperience_id) => {
+        editcadexperience(cadexperience_id, e.target)
+        .then(res => {
+            setCadExperiences([res])
+        })
+    }
+
+    const handleEditButton = (cadExperience) => {
+        setSelectEditData(cadExperience)
+        setShowEditExperiencesForm(true)
+    }
+
+    const handleDeleteButton = (cadexperience_id) => {
+        deletecadexperience(cadexperience_id)
+        .then(res => {
+            setCadExperiences(cadExperiences.filter(c=> c.cadexperience_id !== cadexperience_id))
+        })
+    }
+
 
     function handleCancelButton() {
         setShowCadExperiencesForm(false)
@@ -47,13 +70,17 @@ function CadExperienceList() {
                             <td>{cadExperience.cadexperience_first_name}</td>
                             <td>{cadExperience.cadexperience_last_name}</td>
                             <td>{cadExperience.cadexperience_degree}</td>
-                            <td>Edit | Delete</td>
+                            <td><button onClick={ ()=>handleEditButton(cadExperience)}>Editar</button>
+                                 | 
+                            <button onClick={ ()=>handleDeleteButton(cadExperience.cadexperience_id) }>Delete</button>
+                            </td>
                         </tr>
                         )})}                 
                 </tbody>
             </table>
             <button onClick={() => setShowCadExperiencesForm(true)}>Adicionar Usuário</button>
             {showCadExperiencesForm && <CadExperienceAdd handleAddSubmit={handleAddSubmit} handleCancelButton={handleCancelButton} />}
+            {showEditExperiencesForm && <CadExperienceEdit handleEditSubmit={handleEditSubmit} selectEditData={selectEditData} />}
         </>
   )
 }
